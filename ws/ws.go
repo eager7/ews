@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-var logger = log.New(os.Stdout, "[ws]", log.LstdFlags)
+var logger = log.New(os.Stdout, "[ws]", log.LstdFlags|log.Lshortfile)
 
 /*
 ** 将http请求升级为web socket长连接
  */
-func NewHttpConnection(w http.ResponseWriter, r *http.Request, respHeader http.Header, callback Handler) error {
+func NewHttpConnection(w http.ResponseWriter, r *http.Request, respHeader http.Header, callback MessageHandler) error {
 	upGrader := websocket.Upgrader{
 		HandshakeTimeout: 5 * time.Second,
 		ReadBufferSize:   4096,
