@@ -1,18 +1,19 @@
 package ws
 
 import (
-	"github.com/eager7/elog"
 	"github.com/gorilla/websocket"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
-var logger = elog.NewLogger("ws", elog.NoticeLevel)
+var logger = log.New(os.Stdout, "[ws]", log.LstdFlags)
 
 /*
 ** 将http请求升级为web socket长连接
  */
-func NewHttpConnection(w http.ResponseWriter, r *http.Request, respHeader http.Header) error {
+func NewHttpConnection(w http.ResponseWriter, r *http.Request, respHeader http.Header, callback Handler) error {
 	upGrader := websocket.Upgrader{
 		HandshakeTimeout: 5 * time.Second,
 		ReadBufferSize:   4096,
@@ -25,9 +26,9 @@ func NewHttpConnection(w http.ResponseWriter, r *http.Request, respHeader http.H
 
 	wsConn, err := upGrader.Upgrade(w, r, respHeader)
 	if err != nil {
-		logger.Debug("upgrade http connect to ws err:", err)
+		logger.Println("upgrade http connect to ws err:", err)
 		return err
 	}
-	go readRoutine(wsConn)
+	go readRoutine(wsConn, callback)
 	return err
 }

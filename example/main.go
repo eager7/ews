@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eager7/ews/ws"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"net/http"
 )
 
@@ -13,7 +14,6 @@ func main() {
 	iv1Router := internal.Group("v1")
 
 	iv1Router.GET("/ws", WsHandler)
-	iv1Router.POST("/ws", WsHandler)
 
 	server := &http.Server{Addr: "0.0.0.0:2333", Handler: internal}
 	if err := server.ListenAndServe(); err != nil {
@@ -23,10 +23,15 @@ func main() {
 
 func WsHandler(ctx *gin.Context) {
 	fmt.Println("client:", ctx.ClientIP())
-	err := ws.NewHttpConnection(ctx.Writer, ctx.Request, nil)
+	err := ws.NewHttpConnection(ctx.Writer, ctx.Request, nil, HandleMessage)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusOK, "hello world!")
 	}
 	fmt.Println("success connect:", ctx.Request.RemoteAddr)
+}
+
+func HandleMessage(conn *websocket.Conn, msgType int, MsgContent string) {
+	fmt.Println("receive message:", msgType, MsgContent)
+	_ = ws.Write(conn, 2, []byte(MsgContent))
 }

@@ -5,27 +5,30 @@ import (
 	"time"
 )
 
-func readRoutine(conn *websocket.Conn) {
+type Handler func(conn *websocket.Conn, msgType int, MsgContent string)
+
+func readRoutine(conn *websocket.Conn, callback Handler) {
 	for {
 		select {
 		default:
 			typ, body, err := conn.ReadMessage()
 			if err != nil {
-				logger.Warn("read message err, closed:", err)
+				logger.Println("read message err, closed:", err)
 			} else {
-				logger.Debug("message:", typ, string(body))
+				logger.Println("message:", typ, string(body))
+				go callback(conn, typ, string(body))
 			}
 		}
 	}
 }
 
-func write(conn *websocket.Conn, msgType int, message []byte) error {
+func Write(conn *websocket.Conn, msgType int, message []byte) error {
 	if err := conn.SetWriteDeadline(time.Now().Add(time.Second * 3)); err != nil {
-		logger.Warn("set write dead line err:", err)
+		logger.Println("set write dead line err:", err)
 		return err
 	}
 	if err := conn.WriteMessage(msgType, message); err != nil {
-		logger.Error("write message err:", err)
+		logger.Println("write message err:", err)
 		return err
 	}
 	return nil
