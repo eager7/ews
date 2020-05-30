@@ -11,7 +11,7 @@ import (
 var logger = log.New(os.Stdout, "[ws]", log.LstdFlags|log.Lshortfile)
 
 /*
-** 将http请求升级为web socket长连接
+** 将http请求升级为web socket长连接，同时启动线程接收信息放入回调函数
  */
 func NewHttpConnection(w http.ResponseWriter, r *http.Request, respHeader http.Header, callback MessageHandler) error {
 	upGrader := websocket.Upgrader{

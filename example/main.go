@@ -31,7 +31,10 @@ func WsHandler(ctx *gin.Context) {
 	fmt.Println("success connect:", ctx.Request.RemoteAddr)
 }
 
-func HandleMessage(conn *websocket.Conn, msgType int, MsgContent string) {
-	fmt.Println("receive message:", msgType, MsgContent)
+func HandleMessage(conn *websocket.Conn, msgType int, MsgContent string, err error) {
+	fmt.Println("receive message:", msgType, MsgContent, err)
+	if err != nil {
+		return
+	}
 	_ = ws.Write(conn, 2, []byte(MsgContent))
 }
